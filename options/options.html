@@ -1,0 +1,64 @@
+<!doctype html>
+<style type="text/css">
+	form label {
+		display: block;
+		float: left;
+		clear: left;
+		margin: 10px 0;
+	}
+		form label b {
+			display: block;
+			float: left;
+			width: 80px;
+			margin-right: 20px;
+		}
+		form label input,
+		form label textarea,
+		form label select {
+			float: left;
+			width: 180px;
+		}
+		form label input[type="radio"],
+		form label input[type="checkbox"] {
+			width: 20px;
+		}
+	form p {
+		clear: left;
+		margin: 10px 0 0;
+	}
+	form input[type="button"] {
+		width:290px;
+		float:left;
+	}
+</style>
+<form>
+	<fieldset>
+		<legend>TPS Reports Options</legend>
+		
+		<label><b>Full Jira Domain</b>
+			<input type="text" id="domain" placeholder="abcd.jira.com">
+		</label>
+	
+		<label><b>Report Send Email</b>
+			<input type="email" id="email" placeholder="bill@innitech.com">
+		</label>
+		
+		<label><b>Date Format</b>
+			<input type="text" id="dateformat" placeholder="dd/mm/yyyy">
+		</label>
+		
+		<label><b>Subject</b>
+			<input type="text" id="subject" placeholder="Weekly Report">
+		</label>
+
+		<label><b>Show Ticket progress in report (Started or Finished)</b>
+			<input type="checkbox" id="progress" >
+		</label>
+
+		<div style="clear:both;"></div>
+		<input type="button" value="Save" id="save">
+	</fieldset>
+
+	
+</form>
+<script type="text/javascript" src="/scripts/options.js"></script>
