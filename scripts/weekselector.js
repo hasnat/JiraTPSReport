@@ -6,6 +6,7 @@ $(function() {
     var username = '';
     var subject = 'Weekly Report';
     var showprogress = false;
+    var domain = '';
     var selectCurrentWeek = function() {
         window.setTimeout(function () {
             $('.week-picker').find('.ui-datepicker-current-day a').addClass('ui-state-active')
@@ -13,7 +14,7 @@ $(function() {
     }
     chrome.tabs.executeScript( null, {code:"document.getElementById('header-details-user-fullname').getAttribute('data-username')"},
        function(results){ username = results; console.log(results); 
-            chrome.storage.sync.get(["email", "progress", "subject", "dateformat"], function(items) {
+            chrome.storage.sync.get(["domain", "email", "progress", "subject", "dateformat"], function(items) {
                 if (typeof items.email != 'undefined')
                     $('#sendto').val(items.email);
                 if (typeof items.progress != 'undefined')
@@ -22,6 +23,8 @@ $(function() {
                     subject = items.subject;
                 if (typeof items.dateformat != 'undefined')
                     dateFormat = items.dateformat;
+                if (typeof items.domain != 'undefined')
+                    domain = items.domain;
                 showCalendar();
             });
         });
@@ -72,11 +75,18 @@ $(function() {
         $('#subject').val(emailSubject);
 
         selectCurrentWeek();
+        if (typeof domain == 'undefined' || domain=='' || domain == 'undefined') {
+            alert('Seems like you didn\'t setup your domain for JIRA'+"\n"+
+                'Please check extension options in'+"\n"+
+                'Chrome->settings->extensions->TPS Reports For Jira'
+                );
+            return;
+        }
         if (typeof username == 'undefined' || username=='' || username == 'undefined') {
             alert('Seems like you\'re not logged in JIRA'+"\n"+
                 'Please login and try again.'+"\n"+
                 'Or you\'re on a wrong tab, please check extension options in'+"\n"+
-                ' chrome->settings->extensions->TPS Reports For Jira'
+                'Chrome->settings->extensions->TPS Reports For Jira'
                 );
             return;
         }
@@ -94,7 +104,7 @@ $(function() {
 
 
     function getFeedBoiiii (startDate, endDate, user) {
-        return $.get('https://jira.dotmobi.mobi/activity?maxResults=40&streams=user+IS+'+user+'&streams=update-date+BETWEEN+'+startDate+'+'+endDate+'&os_authType=basic&title=undefined', function (data) {
+        return $.get('https://'+domain+'/activity?maxResults=40&streams=user+IS+'+user+'&streams=update-date+BETWEEN+'+startDate+'+'+endDate+'&os_authType=basic&title=undefined', function (data) {
             workedOn = [];
                 $(data).find("entry").each(function () { // or "item" or whatever suits your feed
                     var item = [];
