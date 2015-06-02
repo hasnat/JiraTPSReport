@@ -1,5 +1,4 @@
 function checkForValidUrl(url, tabId, changeInfo, tab) {
-  console.log(url);
   var domain = '';
   chrome.storage.sync.get(["domain"], function(items) {
     domain = items.domain;
@@ -8,7 +7,6 @@ function checkForValidUrl(url, tabId, changeInfo, tab) {
     }
     showIcon(tabId, changeInfo, tab);
   });
-  
 };
 function showIcon(tabId, changeInfo, tab) {
   chrome.pageAction.show(tabId);
@@ -21,12 +19,15 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   chrome.tabs.query({
       active: true,               // Select active tabs
       lastFocusedWindow: true     // In the current window
-    }, function(array_of_Tabs) {
-      var tab = array_of_Tabs[0];
-      
-      var url = tab.url;
-      
-      checkForValidUrl(url, tabId, changeInfo, tab);
+    }, function(tabs) {
+      if (tabs.length>0)
+      {
+          var tab = tabs[0];
+
+          var url = tab.url;
+
+          checkForValidUrl(url, tabId, changeInfo, tab);
+      }
 
     });
   

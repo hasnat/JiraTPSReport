@@ -5,20 +5,19 @@ $(function() {
     var workedOn = [];
     var username = '';
     var subject = 'Weekly Report';
-    var showprogress = false;
+
     var domain = '';
     var selectCurrentWeek = function() {
         window.setTimeout(function () {
             $('.week-picker').find('.ui-datepicker-current-day a').addClass('ui-state-active')
         }, 1);
-    }
-    chrome.tabs.executeScript( null, {code:"document.getElementById('header-details-user-fullname').getAttribute('data-username')"},
-       function(results){ username = results; console.log(results); 
-            chrome.storage.sync.get(["domain", "email", "progress", "subject", "dateformat"], function(items) {
+    };
+    chrome.tabs.executeScript( null,
+        {code:"document.getElementById('header-details-user-fullname').getAttribute('data-username')"},
+        function(results){ username = results; console.log(results);
+            chrome.storage.sync.get(["domain", "email", "subject", "dateformat"], function(items) {
                 if (typeof items.email != 'undefined')
                     $('#sendto').val(items.email);
-                if (typeof items.progress != 'undefined')
-                    showprogress = items.progress;
                 if (typeof items.subject != 'undefined')
                     subject = items.subject;
                 if (typeof items.dateformat != 'undefined')
@@ -27,8 +26,9 @@ $(function() {
                     domain = items.domain;
                 showCalendar();
             });
-        });
-    
+        }
+    );
+
     
     function showCalendar(){
         $('.week-picker').datepicker( {
@@ -96,44 +96,48 @@ $(function() {
         console.log(whatYaUpto);
         whatYaUpto.then(function(res){
             console.log(workedOn);
-            $('#body').val(weeklyReportText + "\n"); 
-            buildReport();   
-        })
+            clearData();
+            prepareData(weeklyReportText + "\n");
+            prepareData(buildReport());
+            initGitlab();
+        });
     }
 
 
-
     function getFeedBoiiii (startDate, endDate, user) {
-        return $.get('https://'+domain+'/activity?maxResults=40&streams=user+IS+'+user+'&streams=update-date+BETWEEN+'+startDate+'+'+endDate+'&os_authType=basic&title=undefined', function (data) {
+        var url = 'https://'+domain+'/activity?maxResults=200&streams=user+IS+'+user+'&streams=update-date+BETWEEN+'+startDate+'+'+endDate+'&os_authType=basic&title=undefined';
+
+        return $.get(url, function (data) {
+            var workedOnCopy = [];
             workedOn = [];
                 $(data).find("entry").each(function () { // or "item" or whatever suits your feed
                     var item = [];
                     var el = $(this);
                     var date = new Date(el.find("updated").text().split('T')[0]);
-                    console.log(el.find("updated").text().split('T')[0]);
-                    if (el.find("category").attr('term') == 'started' || 
-                        el.find("category").attr('term') == 'Ready To Test'){
-                        switch (el.find("category").attr('term')) {
-                            case 'started':
-                            item['type'] = 'started';
-                            break;
-                            case 'Ready To Test':
-                            item['type'] = 'finished';
-                            break;       
-                        }
-                        item['ticket'] = el.find("object").find("title").text();
-                        item['title'] = el.find("object").find("summary").text();
-                        item['time'] = date.format(dateFormat);
-                        workedOn.push(item);
 
+                    item['time'] = date.format(dateFormat);
+                    item['type'] = el.find("category").attr('term');
+                    var validTag = "activity\\:object, object";
+                    if (el.find("activity\\:target, target").length>0) {
+                        validTag = "activity\\:target, target";
                     }
+                    item['ticket'] = el.find(validTag).find("title").text();
+                    item['title'] = el.find(validTag).find("summary").text();
+                    item['link'] = el.find(validTag).find("link").attr("href");
 
+                    if (item['ticket']=='')
+                        console.log(el.find(validTag), el.find("target"));
+                    if (workedOnCopy.indexOf(item['ticket'])<0) {
+                        workedOn.push(item);
+                        workedOnCopy.push(item['ticket']);
+                    }
                 });
-            removeDuplicates();
+
             return workedOn;
         })
 
     }
+
     function removeDuplicates() {
         for (var i = workedOn.length - 1; i >= 0; i--) {
             if (workedOn[i]['type'] == 'finished') {
@@ -155,26 +159,13 @@ $(function() {
 
     
     function buildReport() {
-        var prevDay = '';
-        var report = '';
+        var reportArray = [];
 
         for (var i = workedOn.length - 1; i >= 0; i--) {
-            if (prevDay != workedOn[i]['time'])
-                report += "\n" + workedOn[i]['time'] + "\n";
-            prevDay = workedOn[i]['time'];
-            report += "       "
-            if (workedOn[i]['type'] == 'started' && showprogress)
-                report +='Started ' + "         "
-            else if (showprogress)
-                report +='Finished ' + "       "
-            report += workedOn[i]['ticket'] + ' - ' + workedOn[i]['title'];
+            reportArray.push(workedOn[i]['ticket'] + ' - ' + workedOn[i]['title'] + "\n");
+        }
 
-            report += "\n";
-
-        };
-        console.log(report);
-        $('#body').val($('#body').val() + report); 
-        return report;
+        return "\n\n       " + reportArray.sort().join("       ");
     }
 
 

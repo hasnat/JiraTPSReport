@@ -35,7 +35,7 @@
 	<fieldset>
 		<legend>TPS Reports Options</legend>
 		
-		<label><b>Full Jira Domain</b>
+		<label><b>Jira Domain</b>
 			<input type="text" id="domain" placeholder="abcd.jira.com">
 		</label>
 	
@@ -51,14 +51,41 @@
 			<input type="text" id="subject" placeholder="Weekly Report">
 		</label>
 
-		<label><b>Show Ticket progress in report (Started or Finished)</b>
-			<input type="checkbox" id="progress" >
+		<label><b>Show gitlab commits</b>
+			<input type="checkbox" id="enableGitlab" checked="checked">
 		</label>
 
+		<div id="gitlab">
+			<label><b>Gitlab Status</b>
+				<input type="text" id="gitlabStatus" value="Checking Status" disabled>
+			</label>
+			<label>
+				<input type="button" value="Connect" id="connectGitlab">
+			</label>
+			<label><b>Gitlab Domain</b>
+				<input type="text" id="gitlabDomain">
+			</label>
+			<label><b>Gitlab CLIENT_ID</b>
+				<input type="text" id="gitlabClientID">
+			</label>
+			<label><b>Gitlab CLIENT_SECRET</b>
+				<input type="text" id="gitlabClientSecret">
+			</label>
+			<label><b>Tracking Projects</b>
+				<div id="gitlabProjects">
+					<input type="checkbox" name="" />
+				</div>
+			</label>
+		</div>
 		<div style="clear:both;"></div>
 		<input type="button" value="Save" id="save">
 	</fieldset>
 
 	
 </form>
+
+<script type="text/javascript" src="/scripts/common.js"></script>
 <script type="text/javascript" src="/scripts/options.js"></script>
+<script type="text/javascript" src="/vendor/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/scripts/gitlabAPI.js"></script>
+<script type="text/javascript" src="/scripts/gitlabAuth.js"></script>
